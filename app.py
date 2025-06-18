@@ -90,30 +90,40 @@ if st.button("📊 결과 보기"):
             total_nonrenew = int(nonrenew_result["총 납입금액"].replace(",", "").replace("원", ""))
             diff = total_renew - total_nonrenew
 
-            # 💰 총 납입금 비교
+            # 💰 총 납입금 비교 (HTML로 정렬 통일)
             st.markdown("### 💰 총 납입금 비교")
             col1, col2, col3 = st.columns(3)
-            col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
-            col2.metric("비갱신형 총액", f"{total_nonrenew:,.0f} 원")
 
-            # ✅ 차이 항목 - 크기 키우고 색상 반영
+            with col1:
+                st.markdown("**갱신형 총액**")
+                st.markdown(
+                    f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>",
+                    unsafe_allow_html=True
+                )
+
+            with col2:
+                st.markdown("**비갱신형 총액**")
+                st.markdown(
+                    f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_nonrenew:,.0f} 원</div>",
+                    unsafe_allow_html=True
+                )
+
             with col3:
                 st.markdown("**차이**")
-                if diff > 0:
-                    st.markdown(
-                        f"<span style='color:red; font-size:3rem; font-weight:bold;'>-{abs(diff):,} 원</span>",
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.markdown(
-                        f"<span style='font-size:3rem; font-weight:bold;'>{abs(diff):,} 원</span>",
-                        unsafe_allow_html=True
-                    )
+                color = "red" if diff > 0 else "black"
+                sign = "-" if diff > 0 else ""
+                st.markdown(
+                    f"<div style='color:{color}; font-size:3rem; font-weight:bold; line-height:1.1'>{sign}{abs(diff):,} 원</div>",
+                    unsafe_allow_html=True
+                )
 
             st.success("✅ 추천: 비갱신형 전환 시 총 납입금이 절감되어 장기적으로 유리할 수 있습니다.")
         else:
             # 비갱신형 입력 없을 경우
             st.markdown("### 💰 총 납입금")
-            st.metric("갱신형 총액", f"{total_renew:,.0f} 원")
+            st.markdown(
+                f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>",
+                unsafe_allow_html=True
+            )
     else:
         st.warning("❗ 갱신형 보험 입력값을 모두 입력해주세요.")
