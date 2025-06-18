@@ -21,14 +21,13 @@ with col_right:
     nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30])
 
 # 📌 갱신형 계산 함수
-
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
     max_age = 90
     current_age = age_at_start
     payments = []
 
     if renewal_cycle == 10:
-        increase_rates = [2.5166, 2.311, 1.6959, 1.3226, 1.083, 1.0624, 1.0388]
+        increase_rates = [2.5166, 2.311, 1.8959, 1.3226, 1.083, 1.0624, 1.0388]
     else:
         increase_rates = [4.82, 1.5, 1.08]
 
@@ -71,29 +70,30 @@ def calculate_nonrenewal_payment(monthly_payment, pay_years):
         "총 납입금액": round(total)
     }
 
-# ✅ 조건 충족 시 계산 수행
-if None not in (start_year, start_age, monthly_payment, nonrenew_monthly):
-    renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle)
-    df_renew = pd.DataFrame(renewal_results)
-    nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
-    df_nonrenew = pd.DataFrame([nonrenew_result])
+# ✅ 결과 보기 버튼 클릭 시 계산 수행
+if st.button("📊 결과 보기"):
+    if None not in (start_year, start_age, monthly_payment, nonrenew_monthly):
+        renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle)
+        df_renew = pd.DataFrame(renewal_results)
+        nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
+        df_nonrenew = pd.DataFrame([nonrenew_result])
 
-    st.subheader("🔹 갱신형 보험 납입 내역")
-    st.dataframe(df_renew, use_container_width=True)
+        st.subheader("🔹 갱신형 보험 납입 내역")
+        st.dataframe(df_renew, use_container_width=True)
 
-    st.subheader("🔹 비갱신형 보험 납입 내역")
-    st.dataframe(df_nonrenew, use_container_width=True)
+        st.subheader("🔹 비갱신형 보험 납입 내역")
+        st.dataframe(df_nonrenew, use_container_width=True)
 
-    # 비교
-    total_renew = df_renew["기간 총액"].sum()
-    total_nonrenew = df_nonrenew["총 납입금액"].iloc[0]
-    diff = total_renew - total_nonrenew
+        # 비교
+        total_renew = df_renew["기간 총액"].sum()
+        total_nonrenew = df_nonrenew["총 납입금액"].iloc[0]
+        diff = total_renew - total_nonrenew
 
-    st.markdown("### 💰 총 납입금 비교")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
-    col2.metric("비갱신형 총액", f"{total_nonrenew:,.0f} 원")
-    col3.metric("차이", f"{diff:,.0f} 원", delta=f"{diff:,.0f} 원")
+        st.markdown("### 💰 총 납입금 비교")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
+        col2.metric("비갱신형 총액", f"{total_nonrenew:,.0f} 원")
+        col3.metric("차이", f"{diff:,.0f} 원", delta=f"{diff:,.0f} 원")
 
-else:
-    st.info("📥 모든 입력값을 채우면 자동으로 결과가 계산됩니다.")
+    else:
+        st.warning("❗ 모든 입력값을 입력해주세요.")
