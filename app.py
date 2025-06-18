@@ -27,11 +27,14 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
     current_age = age_at_start
     payments = []
 
-    # 병선님 기준 증가율 (7단계)
-    increase_rates = [2.5166, 2.311, 1.8959, 1.3226, 1.083, 1.0624, 1.0388]
-    cycle = renewal_cycle
+    if renewal_cycle == 10:
+        increase_rates = [2.5166, 2.311, 1.8959, 1.3226, 1.083, 1.0624, 1.0388]
+    else:
+        increase_rates = [4.82, 1.5, 1.08]
 
+    cycle = renewal_cycle
     idx = 0
+
     while current_age < max_age:
         years = min(cycle, max_age - current_age)
         months = years * 12
@@ -47,7 +50,6 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
             "기간 총액": round(total)
         })
 
-        # 다음 갱신 주기 보험료 계산
         if idx < len(increase_rates):
             monthly_payment *= increase_rates[idx]
         else:
