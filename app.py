@@ -5,15 +5,6 @@ import pandas as pd
 st.set_page_config(page_title="갱신 vs 비갱신 보험 비교", layout="wide")
 st.title("📊 갱신형 vs 비갱신형 보험 납입금 비교")
 
-# 📌 첫 진입 시 팝업 알림
-if "popup_shown" not in st.session_state:
-    st.session_state.popup_shown = False
-
-if not st.session_state.popup_shown:
-    with st.expander("🔔 안내 메시지 (닫기)", expanded=True):
-        st.markdown("👈 **왼쪽 위의 `>` 아이콘을 눌러 안내문을 확인하세요!**\n\n필요한 설정은 사이드바에 있습니다 😊")
-    st.session_state.popup_shown = True
-
 # 👉 입력 영역을 왼쪽과 오른쪽으로 나눔
 col_left, col_right = st.columns(2)
 
