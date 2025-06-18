@@ -26,7 +26,7 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_
     payments = []
 
     if renewal_cycle == 10:
-        increase_rates = [2.5166, 1.711, 1.8959, 1.3226, 1.083, 1.0624, 1.0388]
+        increase_rates = [2.5166, 1.711, 1.2959, 1.3226, 1.083, 1.0624, 1.0388]
     else:
         increase_rates = [3.02, 1.5, 1.08]
 
