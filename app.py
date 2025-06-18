@@ -4,7 +4,26 @@ import pandas as pd
 st.set_page_config(page_title="갱신 vs 비갱신 보험 비교", layout="wide")
 st.title("📊 갱신형 vs 비갱신형 보험 납입금 비교")
 
-# 👉 사이드바 안내문
+# 👉 입력 영역을 왼쪽과 오른쪽으로 나눔
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.header("🌀 갱신형 보험 입력")
+    start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
+    start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
+
+    # 🔁 갱신 주기 선택
+    renewal_cycle = st.selectbox("🔁 갱신 주기", [10, 20], index=0)
+
+    end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
+    monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
+
+with col_right:
+    st.header("🌱 비갱신형 보험 입력 (선택)")
+    nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=None, step=1000)
+    nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30], index=2)
+
+# 👉 사이드바 안내문 및 증가율 입력
 with st.sidebar:
     st.markdown("### 📘 사용 가이드")
     st.markdown("""
@@ -22,33 +41,21 @@ with st.sidebar:
     🖨️ 인쇄 시 적정 배율은 **97%**입니다.
     """)
 
-# 👉 입력 영역을 왼쪽과 오른쪽으로 나눔
-col_left, col_right = st.columns(2)
+    st.markdown("---")
+    st.markdown("### 📈 갱신 주기별 증가율 설정")
 
-with col_left:
-    st.header("🌀 갱신형 보험 입력")
-    start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
-    start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
-
-    # 🔁 갱신 주기 선택을 여기로 이동
-    renewal_cycle = st.selectbox("🔁 갱신 주기", [10, 20], index=0)
-
-    end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
-    monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
-
-with col_right:
-    st.header("🌱 비갱신형 보험 입력 (선택)")
-    nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=None, step=1000)
-    nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30], index=2)  # 기본값 20
-
-# 👉 갱신 주기별 가중치 입력
-st.markdown("### 📈 갱신 주기별 증가율 설정")
-if renewal_cycle == 10:
-    default_weights = [2.5166, 1.711, 1.2959, 1.7226, 1.083, 1.0624, 1.0388]
-    user_weights = [st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f") for i in range(7)]
-else:
-    default_weights = [4.2237, 1.8207, 1.2832]
-    user_weights = [st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f") for i in range(3)]
+    if renewal_cycle == 10:
+        default_weights = [2.5166, 1.711, 1.2959, 1.7226, 1.083, 1.0624, 1.0388]
+        user_weights = [
+            st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f", key=f"rate_10_{i}")
+            for i in range(7)
+        ]
+    else:
+        default_weights = [4.2237, 1.8207, 1.2832]
+        user_weights = [
+            st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f", key=f"rate_20_{i}")
+            for i in range(3)
+        ]
 
 # 📌 갱신형 계산 함수
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age, increase_rates):
