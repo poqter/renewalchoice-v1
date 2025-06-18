@@ -11,14 +11,14 @@ with col_left:
     st.header("🌀 갱신형 보험 입력")
     start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
-    renewal_cycle = st.selectbox("갱신 주기", [10, 20])
+    renewal_cycle = st.selectbox("갱신 주기", [10, 20], index=1)  # 기본값 20
     end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
 
 with col_right:
     st.header("🌱 비갱신형 보험 입력 (선택)")
     nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=None, step=1000)
-    nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30])
+    nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30], index=2)  # 기본값 20
 
 # 📌 갱신형 계산 함수
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age):
