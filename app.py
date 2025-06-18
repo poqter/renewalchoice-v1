@@ -13,6 +13,7 @@ with col_left:
     start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
     renewal_cycle = st.selectbox("갱신 주기", [10, 20])
+    end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=90, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
 
 with col_right:
@@ -21,8 +22,7 @@ with col_right:
     nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30])
 
 # 📌 갱신형 계산 함수
-def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
-    max_age = 90
+def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age):
     current_age = age_at_start
     payments = []
 
@@ -34,8 +34,8 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
     cycle = renewal_cycle
     idx = 0
 
-    while current_age < max_age:
-        years = min(cycle, max_age - current_age)
+    while current_age < end_age:
+        years = min(cycle, end_age - current_age)
         months = years * 12
 
         payment = monthly_payment
@@ -69,8 +69,8 @@ def calculate_nonrenewal_payment(monthly_payment, pay_years):
 
 # ✅ 결과 보기 버튼 클릭 시 계산 수행
 if st.button("📊 결과 보기"):
-    if None not in (start_year, start_age, monthly_payment, nonrenew_monthly):
-        renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle)
+    if None not in (start_year, start_age, end_age, monthly_payment, nonrenew_monthly):
+        renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle, end_age)
         df_renew = pd.DataFrame(renewal_results)
         df_renew.index = df_renew.index + 1
 
