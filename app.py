@@ -78,11 +78,7 @@ if st.button("📊 결과 보기"):
         st.dataframe(df_renew, use_container_width=True)
 
         total_renew = sum([int(r["기간 총액"].replace(",", "")) for r in renewal_results])
-        st.markdown("### 💰 총 납입금 비교")
-        col1 = st.columns(1)[0]
-        col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
-
-        if nonrenew_monthly > 0:
+                if nonrenew_monthly > 0:
             nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
             df_nonrenew = pd.DataFrame([nonrenew_result])
             df_nonrenew.index = df_nonrenew.index + 1
