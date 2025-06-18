@@ -57,6 +57,14 @@ with st.sidebar:
             for i in range(3)
         ]
 
+    st.markdown("---")
+    st.markdown("""
+    👨‍💻 **제작자**: 비전본부 드림지점 박병선 팀장  
+    🗓️ **버전**: v1.0.3  
+    📅 **최종 업데이트**: 2025-06-18
+    """)
+
+
 # 📌 갱신형 계산 함수
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age, increase_rates):
     current_age = age_at_start
