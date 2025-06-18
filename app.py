@@ -122,7 +122,8 @@ if st.button("📊 결과 보기"):
                     unsafe_allow_html=True
                 )
 
-            # 🔹 평균 월 납입금 요약
+            # 📌 평균 월 납입금 (여백 추가 후 표시)
+            st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
             st.markdown("### 📌 평균 월 납입금")
             st.markdown(f"- 갱신형 평균: **{avg_monthly_renew:,.0f} 원**")
             st.markdown(f"- 비갱신형 평균: **{avg_monthly_nonrenew:,.0f} 원**")
