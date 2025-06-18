@@ -101,7 +101,7 @@ if st.button("📊 결과 보기"):
                 st.markdown("**차이**")
                 if diff > 0:
                     st.markdown(
-                        f"<span style='color:red; font-size:1.5rem; font-weight:bold;'>-{abs(diff):,} 원</span>",
+                        f"<span style='color:red; font-size:3rem; font-weight:bold;'>-{abs(diff):,} 원</span>",
                         unsafe_allow_html=True
                     )
                 else:
