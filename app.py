@@ -106,7 +106,7 @@ if st.button("📊 결과 보기"):
                     )
                 else:
                     st.markdown(
-                        f"<span style='font-size:1.5rem; font-weight:bold;'>{abs(diff):,} 원</span>",
+                        f"<span style='font-size:3rem; font-weight:bold;'>{abs(diff):,} 원</span>",
                         unsafe_allow_html=True
                     )
 
