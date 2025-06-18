@@ -21,25 +21,24 @@ with col_right:
     nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30])
 
 # 📌 갱신형 계산 함수
+
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
     max_age = 90
     current_age = age_at_start
     payments = []
 
-    if renewal_cycle == 10:
-        increase_rates = [1.5179, 4.8201, 10.0359, 13.5971, 14.8081, 15.8421, 16.1719]
-        cycle = 10
-    else:
-        increase_rates = [4.82, 13.5971, 19.2414]
-        cycle = 20
+    # 병선님 기준 증가율 (7단계)
+    increase_rates = [2.5166, 2.311, 1.8959, 1.3226, 1.083, 1.0624, 1.0388]
+    cycle = renewal_cycle
 
     idx = 0
     while current_age < max_age:
         years = min(cycle, max_age - current_age)
         months = years * 12
-        rate = increase_rates[idx] if idx < len(increase_rates) else 1
-        payment = monthly_payment * rate
+
+        payment = monthly_payment
         total = payment * months
+
         payments.append({
             "시작나이": current_age,
             "종료나이": current_age + years,
@@ -47,9 +46,16 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
             "기간(개월)": months,
             "기간 총액": round(total)
         })
-        monthly_payment = payment
+
+        # 다음 갱신 주기 보험료 계산
+        if idx < len(increase_rates):
+            monthly_payment *= increase_rates[idx]
+        else:
+            monthly_payment *= increase_rates[-1]
+
         current_age += years
         idx += 1
+
     return payments
 
 # 📌 비갱신형 계산 함수
