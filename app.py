@@ -42,11 +42,11 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
         total = payment * months
 
         payments.append({
-            "시작나이": current_age,
-            "종료나이": current_age + years,
-            "월납입금": round(payment),
-            "기간(개월)": months,
-            "기간 총액": round(total)
+            "순번": idx + 1,
+            "시작나이": f"{int(current_age)}세",
+            "월납입금": f"{int(round(payment)):,}",
+            "기간": f"{years}년",
+            "기간 총액": f"{int(round(total)):,}"
         })
 
         if idx < len(increase_rates):
@@ -61,13 +61,12 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
 
 # 📌 비갱신형 계산 함수
 def calculate_nonrenewal_payment(monthly_payment, pay_years):
-    months = pay_years * 12
-    total = monthly_payment * months
+    total = monthly_payment * pay_years * 12
     return {
+        "순번": 1,
         "납입기간": f"{pay_years}년",
-        "월납입금": round(monthly_payment),
-        "기간(개월)": months,
-        "총 납입금액": round(total)
+        "월납입금": f"{int(round(monthly_payment)):,}",
+        "총 납입금액": f"{int(round(total)):,}"
     }
 
 # ✅ 결과 보기 버튼 클릭 시 계산 수행
@@ -75,6 +74,7 @@ if st.button("📊 결과 보기"):
     if None not in (start_year, start_age, monthly_payment, nonrenew_monthly):
         renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle)
         df_renew = pd.DataFrame(renewal_results)
+
         nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
         df_nonrenew = pd.DataFrame([nonrenew_result])
 
@@ -85,8 +85,8 @@ if st.button("📊 결과 보기"):
         st.dataframe(df_nonrenew, use_container_width=True)
 
         # 비교
-        total_renew = df_renew["기간 총액"].sum()
-        total_nonrenew = df_nonrenew["총 납입금액"].iloc[0]
+        total_renew = sum([int(r["기간 총액"].replace(",", "")) for r in renewal_results])
+        total_nonrenew = int(nonrenew_result["총 납입금액"].replace(",", ""))
         diff = total_renew - total_nonrenew
 
         st.markdown("### 💰 총 납입금 비교")
