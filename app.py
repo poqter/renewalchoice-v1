@@ -12,12 +12,12 @@ with col_left:
     start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
     renewal_cycle = st.selectbox("갱신 주기", [10, 20])
-    end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=90, step=1)
+    end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
 
 with col_right:
     st.header("🌱 비갱신형 보험 입력 (선택)")
-    nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=0, step=1000)
+    nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=None, step=1000)
     nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30])
 
 # 📌 갱신형 계산 함수
@@ -41,9 +41,9 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_
 
         payments.append({
             "시작나이": f"{int(current_age)}세",
-            "월납입금": f"{int(round(payment)):,}",
+            "월납입금": f"{int(round(payment)):,}원",
             "기간": f"{years}년",
-            "기간 총액": f"{int(round(total)):,}"
+            "기간 총액": f"{int(round(total)):,}원"
         })
 
         if idx < len(increase_rates):
@@ -61,8 +61,8 @@ def calculate_nonrenewal_payment(monthly_payment, pay_years):
     total = monthly_payment * pay_years * 12
     return {
         "납입기간": f"{pay_years}년",
-        "월납입금": f"{int(round(monthly_payment)):,}",
-        "총 납입금액": f"{int(round(total)):,}"
+        "월납입금": f"{int(round(monthly_payment)):,}원",
+        "총 납입금액": f"{int(round(total)):,}원"
     }
 
 # ✅ 결과 보기 버튼 클릭 시 계산 수행
@@ -76,10 +76,10 @@ if st.button("📊 결과 보기"):
         st.subheader("🔹 갱신형 보험 납입 내역")
         st.dataframe(df_renew, use_container_width=True)
 
-        total_renew = sum([int(r["기간 총액"].replace(",", "")) for r in renewal_results])
+        total_renew = sum([int(r["기간 총액"].replace(",", "").replace("원", "")) for r in renewal_results])
 
-        # 비갱신형이 입력되었을 경우
-        if nonrenew_monthly > 0:
+        if nonrenew_monthly is not None and nonrenew_monthly > 0:
+            # 비갱신형 계산 및 출력
             nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
             df_nonrenew = pd.DataFrame([nonrenew_result])
             df_nonrenew.index = df_nonrenew.index + 1
@@ -87,18 +87,18 @@ if st.button("📊 결과 보기"):
             st.subheader("🔹 비갱신형 보험 납입 내역")
             st.dataframe(df_nonrenew, use_container_width=True)
 
-            total_nonrenew = int(nonrenew_result["총 납입금액"].replace(",", ""))
+            total_nonrenew = int(nonrenew_result["총 납입금액"].replace(",", "").replace("원", ""))
             diff = total_renew - total_nonrenew
 
             st.markdown("### 💰 총 납입금 비교")
             col1, col2, col3 = st.columns(3)
             col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
             col2.metric("비갱신형 총액", f"{total_nonrenew:,.0f} 원")
-            col3.metric("차이", f"{diff:,.0f} 원", delta=f"{diff:,.0f} 원")
+            col3.metric("차이", f"{diff:,.0f} 원", delta=f"{diff:,.0f} 원", delta_color="inverse")
 
             st.success("✅ 추천: 비갱신형 전환 시 총 납입금이 절감되어 장기적으로 유리할 수 있습니다.")
         else:
-            # 비갱신 입력이 없을 경우
+            # 비갱신형 입력 없을 경우
             st.markdown("### 💰 총 납입금")
             st.metric("갱신형 총액", f"{total_renew:,.0f} 원")
     else:
