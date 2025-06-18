@@ -1,8 +1,18 @@
 import streamlit as st
 import pandas as pd
 
+# 📌 페이지 설정
 st.set_page_config(page_title="갱신 vs 비갱신 보험 비교", layout="wide")
 st.title("📊 갱신형 vs 비갱신형 보험 납입금 비교")
+
+# 📌 첫 진입 시 팝업 알림
+if "popup_shown" not in st.session_state:
+    st.session_state.popup_shown = False
+
+if not st.session_state.popup_shown:
+    with st.expander("🔔 안내 메시지 (닫기)", expanded=True):
+        st.markdown("👈 **왼쪽 위의 `>` 아이콘을 눌러 안내문을 확인하세요!**\n\n필요한 설정은 사이드바에 있습니다 😊")
+    st.session_state.popup_shown = True
 
 # 👉 입력 영역을 왼쪽과 오른쪽으로 나눔
 col_left, col_right = st.columns(2)
@@ -11,10 +21,7 @@ with col_left:
     st.header("🌀 갱신형 보험 입력")
     start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
-
-    # 🔁 갱신 주기 선택
     renewal_cycle = st.selectbox("갱신 주기", [10, 20], index=1)
-
     end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
 
@@ -40,7 +47,6 @@ with st.sidebar:
 
     🖨️ 인쇄 시 적정 배율은 **97%**입니다.
     """)
-
     st.markdown("---")
     st.markdown("### 📈 갱신 주기별 증가율 설정")
 
@@ -60,12 +66,9 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("""
     👨‍💻 **제작자**: 비전본부 드림지점 박병선 팀장  
-                
     🗓️ **버전**: v1.0.3  
-                
     📅 **최종 업데이트**: 2025-06-18
     """)
-
 
 # 📌 갱신형 계산 함수
 def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age, increase_rates):
