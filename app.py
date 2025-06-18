@@ -96,13 +96,19 @@ if st.button("📊 결과 보기"):
             col1.metric("갱신형 총액", f"{total_renew:,.0f} 원")
             col2.metric("비갱신형 총액", f"{total_nonrenew:,.0f} 원")
 
-            # 차이 표시 색상 적용
+            # ✅ 차이 항목 - 크기 키우고 색상 반영
             with col3:
                 st.markdown("**차이**")
                 if diff > 0:
-                    st.markdown(f"<span style='color:red;'>-{abs(diff):,} 원</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span style='color:red; font-size:1.5rem; font-weight:bold;'>-{abs(diff):,} 원</span>",
+                        unsafe_allow_html=True
+                    )
                 else:
-                    st.markdown(f"{abs(diff):,} 원")
+                    st.markdown(
+                        f"<span style='font-size:1.5rem; font-weight:bold;'>{abs(diff):,} 원</span>",
+                        unsafe_allow_html=True
+                    )
 
             st.success("✅ 추천: 비갱신형 전환 시 총 납입금이 절감되어 장기적으로 유리할 수 있습니다.")
         else:
