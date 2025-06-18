@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # 📌 페이지 설정
 st.set_page_config(page_title="갱신 vs 비갱신 보험 비교", layout="wide")
@@ -57,9 +58,9 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("""
     👨‍💻 **제작자**: 비전본부 드림지점 박병선 팀장  
-                
+    
     🗓️ **버전**: v1.0.3  
-                
+    
     📅 **최종 업데이트**: 2025-06-18
     """)
 
@@ -110,6 +111,19 @@ if st.button("📊 결과 보기"):
 
         st.subheader("🔹 갱신형 보험 납입 내역")
         st.dataframe(df_renew, use_container_width=True)
+
+        # 🔹 납입금 증가 꺾은선 그래프
+        st.markdown("### 📈 갱신형 보험 납입금 증가 추이")
+        ages = [int(r["시작나이"].replace("세", "")) for r in renewal_results]
+        monthly_payments = [int(r["월납입금"].replace(",", "").replace("원", "")) for r in renewal_results]
+
+        fig, ax = plt.subplots()
+        ax.plot(ages, monthly_payments, marker="o", linewidth=2)
+        ax.set_title("나이별 갱신형 월 납입금 변화", fontsize=14)
+        ax.set_xlabel("나이", fontsize=12)
+        ax.set_ylabel("월 납입금 (원)", fontsize=12)
+        ax.grid(True)
+        st.pyplot(fig)
 
         total_renew = sum([int(r["기간 총액"].replace(",", "").replace("원", "")) for r in renewal_results])
         total_months_renew = sum([int(r["기간"].replace("년", "")) * 12 for r in renewal_results])
