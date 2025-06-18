@@ -13,7 +13,7 @@ with col_left:
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
 
     # 🔁 갱신 주기 선택
-    renewal_cycle = st.selectbox("갱신 주기", [10, 20], index=0)
+    renewal_cycle = st.selectbox("갱신 주기", [10, 20], index=2)
 
     end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
