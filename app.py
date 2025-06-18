@@ -42,7 +42,6 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
         total = payment * months
 
         payments.append({
-            "순번": idx + 1,
             "시작나이": f"{int(current_age)}세",
             "월납입금": f"{int(round(payment)):,}",
             "기간": f"{years}년",
@@ -63,7 +62,6 @@ def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle):
 def calculate_nonrenewal_payment(monthly_payment, pay_years):
     total = monthly_payment * pay_years * 12
     return {
-        "순번": 1,
         "납입기간": f"{pay_years}년",
         "월납입금": f"{int(round(monthly_payment)):,}",
         "총 납입금액": f"{int(round(total)):,}"
@@ -74,9 +72,11 @@ if st.button("📊 결과 보기"):
     if None not in (start_year, start_age, monthly_payment, nonrenew_monthly):
         renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle)
         df_renew = pd.DataFrame(renewal_results)
+        df_renew.index = df_renew.index + 1
 
         nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
         df_nonrenew = pd.DataFrame([nonrenew_result])
+        df_nonrenew.index = df_nonrenew.index + 1
 
         st.subheader("🔹 갱신형 보험 납입 내역")
         st.dataframe(df_renew, use_container_width=True)
