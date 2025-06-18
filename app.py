@@ -4,6 +4,36 @@ import pandas as pd
 st.set_page_config(page_title="갱신 vs 비갱신 보험 비교", layout="wide")
 st.title("📊 갱신형 vs 비갱신형 보험 납입금 비교")
 
+# 👉 사이드바 안내문
+with st.sidebar:
+    st.markdown("### 📘 사용 가이드")
+    st.markdown("""
+    🔄 **갱신 → 비갱신 전환 비교 도구**
+
+    📌 고객의 기존 보험 정보를 바탕으로  
+    갱신형과 제안 비갱신형 상품의 총 납입금 차이를 분석합니다.
+
+    📅 **갱신 종료 나이**는  
+    현실적인 유지 가능 나이 또는 보장 만기를 기준으로 입력해주세요.
+
+    ⚙️ 아래에서 **갱신 주기별 증가율**을 직접 조정할 수 있습니다.  
+    기본값은 통계 기반으로 자동 설정됩니다.
+
+    🖨️ 인쇄 시 적정 배율은 **97%**입니다.
+    """)
+
+    st.markdown("---")
+    weight_mode = st.selectbox("🔧 가중치 설정: 갱신 주기 선택", [10, 20], index=0)
+
+    st.markdown("**📈 가중치 입력 (증가율)**")
+
+    if weight_mode == 10:
+        default_weights = [2.5166, 1.711, 1.2959, 1.7226, 1.083, 1.0624, 1.0388]
+        user_weights = [st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f") for i in range(7)]
+    else:
+        default_weights = [4.2237, 1.8207, 1.2832]
+        user_weights = [st.number_input(f"{i+1}차 갱신 증가율", value=default_weights[i], step=0.01, format="%.4f") for i in range(3)]
+
 # 👉 입력 영역을 왼쪽과 오른쪽으로 나눔
 col_left, col_right = st.columns(2)
 
@@ -11,7 +41,7 @@ with col_left:
     st.header("🌀 갱신형 보험 입력")
     start_year = st.number_input("가입 연도", min_value=1900, max_value=2100, value=None, step=1)
     start_age = st.number_input("가입 당시 나이", min_value=0, max_value=100, value=None, step=1)
-    renewal_cycle = st.selectbox("갱신 주기", [10, 20], index=1)  # 기본값 20
+    renewal_cycle = weight_mode  # 사이드바에서 선택한 주기를 그대로 사용
     end_age = st.number_input("갱신 종료 나이", min_value=0, max_value=100, value=None, step=1)
     monthly_payment = st.number_input("현재 월 납입금액 (원)", min_value=0, value=None, step=1000)
 
@@ -20,21 +50,14 @@ with col_right:
     nonrenew_monthly = st.number_input("비갱신형 월 납입금액 (원)", min_value=0, value=None, step=1000)
     nonrenew_years = st.selectbox("납입기간", [10, 15, 20, 25, 30], index=2)  # 기본값 20
 
-# 📌 갱신형 계산 함수
-def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age):
+# 📌 갱신형 계산 함수 (사용자 가중치 반영)
+def calculate_renewal_payment(age_at_start, monthly_payment, renewal_cycle, end_age, increase_rates):
     current_age = age_at_start
     payments = []
-
-    if renewal_cycle == 10:
-        increase_rates = [2.5166, 1.711, 1.2959, 1.7226, 1.083, 1.0624, 1.0388]
-    else:
-        increase_rates = [4.2237, 1.8207, 1.2832]
-
-    cycle = renewal_cycle
     idx = 0
 
     while current_age < end_age:
-        years = min(cycle, end_age - current_age)
+        years = min(renewal_cycle, end_age - current_age)
         months = years * 12
         payment = monthly_payment
         total = payment * months
@@ -68,21 +91,18 @@ def calculate_nonrenewal_payment(monthly_payment, pay_years):
 # ✅ 결과 보기 버튼 클릭 시 계산 수행
 if st.button("📊 결과 보기"):
     if None not in (start_year, start_age, end_age, monthly_payment):
-        # 갱신형 계산 및 출력
-        renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle, end_age)
+        renewal_results = calculate_renewal_payment(start_age, monthly_payment, renewal_cycle, end_age, user_weights)
         df_renew = pd.DataFrame(renewal_results)
         df_renew.index = df_renew.index + 1
 
         st.subheader("🔹 갱신형 보험 납입 내역")
         st.dataframe(df_renew, use_container_width=True)
 
-        # 총액 및 평균 계산
         total_renew = sum([int(r["기간 총액"].replace(",", "").replace("원", "")) for r in renewal_results])
         total_months_renew = sum([int(r["기간"].replace("년", "")) * 12 for r in renewal_results])
         avg_monthly_renew = total_renew // total_months_renew if total_months_renew > 0 else 0
 
         if nonrenew_monthly is not None and nonrenew_monthly > 0:
-            # 비갱신형 계산 및 출력
             nonrenew_result = calculate_nonrenewal_payment(nonrenew_monthly, nonrenew_years)
             df_nonrenew = pd.DataFrame([nonrenew_result])
             df_nonrenew.index = df_nonrenew.index + 1
@@ -92,55 +112,37 @@ if st.button("📊 결과 보기"):
 
             total_nonrenew = int(nonrenew_result["총 납입금액"].replace(",", "").replace("원", ""))
             avg_monthly_nonrenew = int(nonrenew_monthly)
-
             diff = total_renew - total_nonrenew
 
-            # 💰 총 납입금 비교
             st.markdown("### 💰 총 납입금 비교")
             col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.markdown("**갱신형 총액**")
-                st.markdown(
-                    f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>", unsafe_allow_html=True)
 
             with col2:
                 st.markdown("**비갱신형 총액**")
-                st.markdown(
-                    f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_nonrenew:,.0f} 원</div>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_nonrenew:,.0f} 원</div>", unsafe_allow_html=True)
 
             with col3:
                 st.markdown("**차이**")
                 color = "red" if diff > 0 else "black"
                 sign = "-" if diff > 0 else ""
-                st.markdown(
-                    f"<div style='color:{color}; font-size:3rem; font-weight:bold; line-height:1.1'>{sign}{abs(diff):,} 원</div>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<div style='color:{color}; font-size:3rem; font-weight:bold; line-height:1.1'>{sign}{abs(diff):,} 원</div>", unsafe_allow_html=True)
 
-            # 📌 평균 월 납입금 (여백 추가 후 표시)
             st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
             st.markdown("### 📌 평균 월 납입금")
             st.markdown(f"- 갱신형 평균: **{avg_monthly_renew:,.0f} 원**")
             st.markdown(f"- 비갱신형 평균: **{avg_monthly_nonrenew:,.0f} 원**")
 
-            # ✅ 추천 멘트 조건: 차이가 0보다 클 때만
             if diff > 0:
                 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
                 saved_years = diff // (avg_monthly_nonrenew * 12) if avg_monthly_nonrenew > 0 else 0
                 year_text = f"이 차이는 약 {saved_years}년치 보험료에 해당합니다." if saved_years > 0 else ""
                 st.success(f"✅ 추천: 비갱신형 전환 시 총 납입금이 절감되어 장기적으로 유리할 수 있습니다.\n\n{year_text}")
-
         else:
-            # 비갱신형 입력 없을 경우
             st.markdown("### 💰 총 납입금")
-            st.markdown(
-                f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>",
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div style='font-size:3rem; font-weight:bold; line-height:1.1'>{total_renew:,.0f} 원</div>", unsafe_allow_html=True)
     else:
         st.warning("❗ 갱신형 보험 입력값을 모두 입력해주세요.")
